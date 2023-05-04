@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -38,12 +36,12 @@ public class UserController {
     public User put(@RequestBody User user) {
         boolean checkUserForUpdate = false;
         for (int i = 0; i < users.size(); i++) {
-            if(userValidation(user).equals(users.get(i))){
+            if (userValidation(user).equals(users.get(i))) {
                 users.set(i, userValidation(user));
                 checkUserForUpdate = true;
             }
         }
-        if(!checkUserForUpdate){
+        if (!checkUserForUpdate) {
             throw new ValidationException("Пользователь с id " + user.getId() + " не найден.");
         }
         log.debug("Обновленный пользователь: {}", user);
@@ -51,22 +49,22 @@ public class UserController {
     }
 
     private User userValidation(User user){
-        if(user.getEmail().isEmpty()){
+        if (user.getEmail().isEmpty()) {
             throw new ValidationException("Почта не может быть пустой!");
         }
-        if(!(user.getEmail().contains("@"))){
+        if (!(user.getEmail().contains("@"))) {
             throw new ValidationException("Почта должна содержать символ @.");
         }
-        if(user.getLogin().isEmpty()){
+        if (user.getLogin().isEmpty()) {
             throw new ValidationException("Логин не может быть пустым!");
         }
-        if(user.getLogin().contains(" ")){
+        if (user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может содержать пробелы!");
         }
-        if(user.getBirthday().isAfter(LocalDate.now())){
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения должна быть раньше сегодняшнего дня.");
         }
-        if(user.getName() == null || user.getName().isEmpty()){
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         return user;
