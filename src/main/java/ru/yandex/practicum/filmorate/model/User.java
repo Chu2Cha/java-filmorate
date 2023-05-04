@@ -8,10 +8,10 @@ import java.util.Objects;
 @Data
 public class User {
     private int id;
-    private String email;
-    private String login;
-    private String name;
-    private LocalDate birthday;
+    private  String email;
+    private  String login;
+    private  String name;
+    private  LocalDate birthday;
 
     @Override
     public boolean equals(Object o) {
