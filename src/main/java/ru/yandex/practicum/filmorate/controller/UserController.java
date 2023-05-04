@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @Slf4j
 public class UserController {
-    private int id =1;
+    private int id = 1;
 
     private final List<User> users = new ArrayList<>();
 
@@ -48,7 +48,7 @@ public class UserController {
         return user;
     }
 
-    private User userValidation(User user){
+    private User userValidation(User user) {
         if (user.getEmail().isEmpty()) {
             throw new ValidationException("Почта не может быть пустой!");
         }

@@ -35,7 +35,7 @@ public class FilmController {
     public Film put(@RequestBody Film film) {
         boolean checkFilmForUpdate = false;
         for (int i = 0; i < films.size(); i++) {
-            if (filmValidation(film).equals(films.get(i))) {
+            if (filmValidation(film).equals(films.get(i))){
                 films.set(i, filmValidation(film));
                 checkFilmForUpdate = true;
             }
