@@ -1,20 +1,18 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@Slf4j
 public class FilmController {
     private int id = 1;
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
     private final List<Film> films = new ArrayList<>();
 
