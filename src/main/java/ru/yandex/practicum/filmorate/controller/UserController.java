@@ -19,7 +19,7 @@ public class UserController {
 
     @GetMapping("/users")
     public List<User> findAll() {
-        log.debug("Количество пользователей: {}", users.size());
+        log.info("Количество пользователей: {}", users.size());
         return users;
     }
 
@@ -28,40 +28,40 @@ public class UserController {
         User newUser = userValidation(user);
         newUser.setId(id++);
         users.add(newUser);
-        log.debug("Пользователь: {}", newUser);
+        log.info("Пользователь: {}", newUser);
         return newUser;
     }
 
     @PutMapping("/users")
-    public User put(@RequestBody User user) {
-        boolean checkUserForUpdate = false;
+    public User updateUser(@RequestBody User user) {
+        boolean noUsersForUpdate = true;
         for (int i = 0; i < users.size(); i++) {
             if (userValidation(user).equals(users.get(i))) {
                 users.set(i, userValidation(user));
-                checkUserForUpdate = true;
+                noUsersForUpdate = false;
             }
         }
-        if (!checkUserForUpdate) {
+        if (noUsersForUpdate) {
             throw new ValidationException("Пользователь с id " + user.getId() + " не найден.");
         }
-        log.debug("Обновленный пользователь: {}", user);
+        log.info("Обновленный пользователь: {}", user);
         return user;
     }
 
     private User userValidation(User user) {
-        if (user.getEmail().isEmpty()) {
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
             throw new ValidationException("Почта не может быть пустой!");
         }
         if (!(user.getEmail().contains("@"))) {
             throw new ValidationException("Почта должна содержать символ @.");
         }
-        if (user.getLogin().isEmpty()) {
+        if (user.getLogin() == null || user.getLogin().isEmpty()) {
             throw new ValidationException("Логин не может быть пустым!");
         }
         if (user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может содержать пробелы!");
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения должна быть раньше сегодняшнего дня.");
         }
         if (user.getName() == null || user.getName().isEmpty()) {

@@ -18,7 +18,7 @@ public class FilmController {
 
     @GetMapping("/films")
     public List<Film> findAll() {
-        log.debug("Количество фильмов: {}", films.size());
+        log.info("Количество фильмов: {}", films.size());
         return films;
     }
 
@@ -27,12 +27,12 @@ public class FilmController {
         Film newFilm = filmValidation(film);
         newFilm.setId(id++);
         films.add(newFilm);
-        log.debug("Фильм: {}", newFilm);
+        log.info("Фильм: {}", newFilm);
         return newFilm;
     }
 
     @PutMapping("/films")
-    public Film put(@RequestBody Film film) {
+    public Film updateFilm(@RequestBody Film film) {
         boolean checkFilmForUpdate = false;
         for (int i = 0; i < films.size(); i++) {
             if (filmValidation(film).equals(films.get(i))) {
@@ -51,11 +51,11 @@ public class FilmController {
         if (film.getName() == null || film.getName().isEmpty()) {
             throw new ValidationException("Название фильма не может быть пустым.");
         }
-        if (film.getDescription().length() > 200) {
-            throw new ValidationException("Максимальная длина описания фильма — 200 символов.");
+        if (film.getDescription() == null || film.getDescription().length() > 200) {
+            throw new ValidationException("У фильма должно быть описание, но не длиннее 200 символов.");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Дата релиза фильма должна быть не раньше 28.12.1895");
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("Дата релиза фильма не может быть пустой и должна быть не раньше 28.12.1895");
         }
         if (film.getDuration() <= 0) {
             throw new ValidationException("Продолжительность фильма должна быть положительной.");
