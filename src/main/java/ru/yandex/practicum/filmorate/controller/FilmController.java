@@ -33,17 +33,17 @@ public class FilmController {
 
     @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) {
-        boolean checkFilmForUpdate = false;
+        boolean noFilmForUpdate = true;
         for (int i = 0; i < films.size(); i++) {
             if (filmValidation(film).equals(films.get(i))) {
                 films.set(i, filmValidation(film));
-                checkFilmForUpdate = true;
+                noFilmForUpdate = false;
             }
         }
-        if (!checkFilmForUpdate) {
+        if (noFilmForUpdate) {
             throw new ValidationException("Фильм с id " + film.getId() + " не найден.");
         }
-        log.debug("Обновленный фильм: {}", film);
+        log.info("Обновленный фильм: {}", film);
         return film;
     }
 
