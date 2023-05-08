@@ -123,10 +123,5 @@ class FilmControllerTest {
         filmController.create(film);
         assertEquals("[Film(id=1, name=Normal film name, description=Normal film description, " +
                 "releaseDate=2023-04-01, duration=55)]", filmController.findAll().toString());
-
-
-
-
-
     }
 }

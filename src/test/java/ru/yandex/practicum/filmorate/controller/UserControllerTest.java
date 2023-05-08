@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -12,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
 
-    private User createUserForTest(String name, LocalDate birthday, String login, String email){
+    private User createUserForTest(String name, LocalDate birthday, String login, String email) {
         User user = new User();
         user.setName(name);
         user.setBirthday(birthday);
@@ -58,7 +56,7 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldFailWhenCreateEmptyFieldsUserAndPassWhenEnterMailLoginBirthday(){
+    void shouldFailWhenCreateEmptyFieldsUserAndPassWhenEnterMailLoginBirthday() {
         User emptyUser = new User();
         UserController userController = new UserController();
         assertThrows(ValidationException.class, () -> userController.create(emptyUser));
