@@ -3,12 +3,15 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
+
+    private InMemoryFilmStorage inMemoryFilmStorage;
 
     private Film createFilmForTest(String name, String description, int duration, LocalDate releaseDate) {
         Film film = new Film();
@@ -29,7 +32,7 @@ class FilmControllerTest {
                 "Комедия Квартета И об одном дне из жизни радиостанции",
                 98,
                 LocalDate.of(2008, 3, 20));
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(inMemoryFilmStorage);
         filmController.create(film1);
         assertEquals(1, filmController.findAll().size());
         filmController.create(film2);
@@ -42,7 +45,7 @@ class FilmControllerTest {
                 "Комедия Квартета И о выборах",
                 154,
                 LocalDate.of(2007, 10, 18));
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(inMemoryFilmStorage);
         filmController.create(film1);
         assertEquals("[Film(id=1, name=День выборов, description=Комедия Квартета И о выборах, " +
                 "releaseDate=2007-10-18, duration=154)]", filmController.findAll().toString());
@@ -54,14 +57,14 @@ class FilmControllerTest {
                 "Комедия Квартета И о выборах",
                 154,
                 LocalDate.of(2007, 10, 18));
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(inMemoryFilmStorage);
         filmController.create(film1);
         assertEquals("[Film(id=1, name=День выборов, description=Комедия Квартета И о выборах, " +
                 "releaseDate=2007-10-18, duration=154)]", filmController.findAll().toString());
         film1.setName("День выборов 2");
         film1.setReleaseDate(LocalDate.of(2016, 4, 4));
         film1.setDuration(105);
-        filmController.updateFilm(film1);
+        filmController.update(film1);
         assertEquals("[Film(id=1, name=День выборов 2, description=Комедия Квартета И о выборах, " +
                 "releaseDate=2016-04-04, duration=105)]", filmController.findAll().toString());
     }
@@ -69,7 +72,7 @@ class FilmControllerTest {
     @Test
     void shuldFailAndPassAfterUpdate() {
         Film film = new Film();
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(inMemoryFilmStorage);
         assertThrows(ValidationException.class, () -> filmController.create(film));
         film.setName(" ");
         assertThrows(ValidationException.class, () -> filmController.create(film));

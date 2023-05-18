@@ -1,14 +1,17 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
+    InMemoryUserStorage inMemoryUserStorage;
 
     private User createUserForTest(String name, LocalDate birthday, String login, String email) {
         User user = new User();
@@ -25,7 +28,7 @@ class UserControllerTest {
                 "vasilisa", "vasya@cat.ru");
         User user2 = createUserForTest("Фасолька", LocalDate.of(2019, 7,12),
                 "redOne", "red@cat.ru");
-        UserController userController = new UserController();
+        UserController userController = new UserController(inMemoryUserStorage);
         userController.create(user1);
         assertEquals(1, userController.findAll().size());
         userController.create(user2);
@@ -36,7 +39,7 @@ class UserControllerTest {
     void create() {
         User user1 = createUserForTest("Василиса", LocalDate.of(2015,6,11),
                 "vasilisa", "vasya@cat.ru");
-        UserController userController = new UserController();
+        UserController userController = new UserController(inMemoryUserStorage);
         userController.create(user1);
         assertEquals("[User(id=1, email=vasya@cat.ru, login=vasilisa, " +
                 "name=Василиса, birthday=2015-06-11)]", userController.findAll().toString());
@@ -46,11 +49,11 @@ class UserControllerTest {
     void updateUser() {
         User user1 = createUserForTest("Василиса", LocalDate.of(2015,6,11),
                 "vasilisa", "vasya@cat.ru");
-        UserController userController = new UserController();
+        UserController userController = new UserController(inMemoryUserStorage);
         userController.create(user1);
         user1.setName("Новая Василиса");
         user1.setLogin("NewVasilisa");
-        userController.updateUser(user1);
+        userController.update(user1);
         assertEquals("[User(id=1, email=vasya@cat.ru, login=NewVasilisa, " +
                 "name=Новая Василиса, birthday=2015-06-11)]", userController.findAll().toString());
     }
@@ -58,7 +61,7 @@ class UserControllerTest {
     @Test
     void shouldFailWhenCreateEmptyFieldsUserAndPassWhenEnterMailLoginBirthday() {
         User emptyUser = new User();
-        UserController userController = new UserController();
+        UserController userController = new UserController(inMemoryUserStorage);
         assertThrows(ValidationException.class, () -> userController.create(emptyUser));
         emptyUser.setEmail("vasya@cat.ru");
         assertThrows(ValidationException.class, () -> userController.create(emptyUser));
