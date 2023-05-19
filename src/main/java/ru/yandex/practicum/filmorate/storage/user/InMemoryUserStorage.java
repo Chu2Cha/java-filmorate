@@ -19,45 +19,24 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        User newUser = userValidation(user);
-        newUser.setId(id++);
-        users.add(newUser);
-        log.info("Пользователь: {}", newUser);
-        return newUser;
+        user.setId(id++);
+        users.add(user);
+        return user;
     }
 
     @Override
     public void delete(int userId) {
-        boolean notFound = true;
-        Iterator<User> iterator = users.iterator();
-        while (iterator.hasNext()) {
-            User user = iterator.next();
-            if (user.getId() == userId) {
-                iterator.remove();
-                users.remove(user);
-                notFound = false;
-                log.info("Пользователь с id {} удалён.", userId);
-                break;
-            }
-        }
-        if (notFound) {
-            throw new ValidationException("Пользователь с id " + userId + " не найден.");
-        }
+        users.removeIf(user -> user.getId() == userId);
     }
 
     @Override
     public User update(User user) {
-        boolean noUsersForUpdate = true;
         for (int i = 0; i < users.size(); i++) {
-            if (userValidation(user).equals(users.get(i))) {
-                users.set(i, userValidation(user));
-                noUsersForUpdate = false;
+            if (user.equals(users.get(i))) {
+                users.set(i, user);
+                break;
             }
         }
-        if (noUsersForUpdate) {
-            throw new ValidationException("Пользователь с id " + user.getId() + " не найден.");
-        }
-        log.info("Обновленный пользователь: {}", user);
         return user;
     }
 
@@ -65,26 +44,32 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Количество пользователей: {}", users.size());
         return users;
     }
+    public User findUserById(int id){
+        for(User user : users){
+            if (user.getId()==id)
+                return user;
+            else
+                log.info("Пользователь с id " + id + " не найден.");
+        }
+        return null;
+    }
 
-    private User userValidation(User user) {
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
-            throw new ValidationException("Почта не может быть пустой!");
+    @Override
+    public void addFriend(int first, int second) {
+        for (User user: users){
+            if(user.getId()==first){
+                user.addFriend(second);
+                break;
+            }
         }
-        if (!(user.getEmail().contains("@"))) {
-            throw new ValidationException("Почта должна содержать символ @.");
+    }
+
+    @Override
+    public void removeFriend(int first, int second) {
+        for (User user: users){
+            if(user.getId()==first){
+                user.removeFriend(second);
+            }
         }
-        if (user.getLogin() == null || user.getLogin().isEmpty()) {
-            throw new ValidationException("Логин не может быть пустым!");
-        }
-        if (user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может содержать пробелы!");
-        }
-        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения должна быть раньше сегодняшнего дня.");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        return user;
     }
 }
