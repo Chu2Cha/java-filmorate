@@ -7,8 +7,10 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -89,6 +91,31 @@ public class UserService {
         return true;
     }
 
+      public List<User> getFriendList(int id) {
+        User user = userValidation(userStorage.findUserById(id));
+        List<User> friends = new ArrayList<>();
+        for(Integer friendId: user.getFriends()){
+            friends.add(userStorage.findUserById(friendId));
+        }
+        return friends;
+    }
+
+    public List<User> getFriendsCommonSet(int id, int otherId) {
+        User firstUser = userValidation(userStorage.findUserById(id));
+        User secondUser = userValidation(userStorage.findUserById(otherId));
+       Set<Integer> intersection = new HashSet<>(firstUser.getFriends());
+       intersection.retainAll(secondUser.getFriends());
+        List<User> friends = new ArrayList<>();
+        for(Integer friendId: intersection){
+            friends.add(userStorage.findUserById(friendId));
+        }
+        return friends;
+    }
+
+    public User getUser(int userId) {
+        return userValidation(userStorage.findUserById(userId));
+    }
+
     private User userValidation(User user) {
         if (user.getEmail() == null || user.getEmail().isEmpty()) {
             throw new ValidationException("Почта не может быть пустой!");
@@ -110,5 +137,4 @@ public class UserService {
         }
         return user;
     }
-
 }
