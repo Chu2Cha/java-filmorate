@@ -32,7 +32,7 @@ public class UserService {
 
     public User updateUser(User user) {
         User updatedUser = userValidation(user);
-        if (userStorage.findUserById(updatedUser.getId()) != null) {
+        if (findUserById(updatedUser.getId()) != null) {
             updatedUser = userStorage.update(updatedUser);
             log.info("Обновленный пользователь: {}", updatedUser);
         }
@@ -44,11 +44,11 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        return userValidation(userStorage.findUserById(id));
+        return userValidation(findUserById(id));
     }
 
     public void deleteUser(int id) {
-        if (userStorage.findUserById(id) != null) {
+        if (findUserById(id) != null) {
             userStorage.delete(id);
             log.info("Пользователь с id {} удалён.", id);
         }
@@ -56,7 +56,7 @@ public class UserService {
 
     public void addFriend(int userId, int friendId) {
         if (checkFriendValidation(userId, friendId)) {
-            if (userStorage.findUserById(userId).getFriends().contains(friendId)) {
+            if (findUserById(userId).getFriends().contains(friendId)) {
                 log.info("Пользователи {} и {} уже друзья!", userId, friendId);
             } else {
                 userStorage.addFriend(userId, friendId);
@@ -68,7 +68,7 @@ public class UserService {
 
     public void removeFriend(int userId, int friendId) {
         if (checkFriendValidation(userId, friendId)) {
-            if (!userStorage.findUserById(userId).getFriends().contains(friendId)) {
+            if (!findUserById(userId).getFriends().contains(friendId)) {
                 log.info("Пользователи {} и {} не дружат.", userId, friendId);
             } else {
                 userStorage.removeFriend(userId, friendId);
@@ -79,22 +79,22 @@ public class UserService {
     }
 
     public List<User> getFriendList(int id) {
-        User user = userValidation(userStorage.findUserById(id));
+        User user = userValidation(findUserById(id));
         List<User> friends = new ArrayList<>();
         for (Integer friendId : user.getFriends()) {
-            friends.add(userStorage.findUserById(friendId));
+            friends.add(findUserById(friendId));
         }
         return friends;
     }
 
     public List<User> getFriendsCommonSet(int id, int otherId) {
-        User firstUser = userValidation(userStorage.findUserById(id));
-        User secondUser = userValidation(userStorage.findUserById(otherId));
+        User firstUser = userValidation(findUserById(id));
+        User secondUser = userValidation(findUserById(otherId));
         Set<Integer> intersection = new HashSet<>(firstUser.getFriends());
         intersection.retainAll(secondUser.getFriends());
         List<User> friends = new ArrayList<>();
         for (Integer friendId : intersection) {
-            friends.add(userStorage.findUserById(friendId));
+            friends.add(findUserById(friendId));
         }
         return friends;
     }
@@ -127,14 +127,21 @@ public class UserService {
             log.error("Пользователю {} нельзя дружить самому с собой", userId);
             throw new ValidationException("Пользователю" + userId +" нельзя дружить самому с собой");
         }
-        if (userStorage.findUserById(userId) == null) {
+        if (findUserById(userId) == null) {
             log.error("Пользователь {} не найден", userId);
             throw new NotFoundException("Пользователь" + userId + " не найден");
         }
-        if (userStorage.findUserById(friendId) == null) {
+        if (findUserById(friendId) == null) {
             log.error("Друг {} не найден", friendId);
             throw new NotFoundException("Друг" + friendId + " не найден");
         }
         return true;
+    }
+
+    private User findUserById(int id){
+        if(userStorage.findUserById(id)!=null){
+            return userStorage.findUserById(id);
+        } else
+            throw new NotFoundException("Пользователь с id " + id + " не найден.");
     }
 }

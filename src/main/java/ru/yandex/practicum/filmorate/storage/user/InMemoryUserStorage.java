@@ -46,14 +46,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User findUserById(int id) {
-        boolean notFound = true;
         for (User user : users) {
             if (user.getId() == id) {
                 return user;
             }
         }
-        log.error("Пользователь с id " + id + " не найден.");
-        throw new NotFoundException("Пользователь с id " + id + " не найден.");
+        return null;
     }
 
     @Override
