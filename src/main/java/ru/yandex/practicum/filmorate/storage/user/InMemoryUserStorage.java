@@ -2,12 +2,10 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Component
@@ -40,24 +38,28 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
+    @Override
     public List<User> findAll() {
         log.info("Количество пользователей: {}", users.size());
         return users;
     }
-    public User findUserById(int id){
-        for(User user : users){
-            if (user.getId()==id)
+
+    @Override
+    public User findUserById(int id) {
+        boolean notFound = true;
+        for (User user : users) {
+            if (user.getId() == id) {
                 return user;
-            else
-                log.info("Пользователь с id " + id + " не найден.");
+            }
         }
-        return null;
+        log.error("Пользователь с id " + id + " не найден.");
+        throw new NotFoundException("Пользователь с id " + id + " не найден.");
     }
 
     @Override
     public void addFriend(int first, int second) {
-        for (User user: users){
-            if(user.getId()==first){
+        for (User user : users) {
+            if (user.getId() == first) {
                 user.addFriend(second);
                 break;
             }
@@ -66,8 +68,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void removeFriend(int first, int second) {
-        for (User user: users){
-            if(user.getId()==first){
+        for (User user : users) {
+            if (user.getId() == first) {
                 user.removeFriend(second);
             }
         }

@@ -20,11 +20,9 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public Film create(Film film) {
-        Film newFilm = filmValidation(film);
-        newFilm.setId(id++);
-        films.add(newFilm);
-        log.info("Фильм: {}", newFilm);
-        return newFilm;
+        film.setId(id++);
+        films.add(film);
+        return film;
     }
 
     @Override
@@ -58,7 +56,7 @@ public class InMemoryFilmStorage implements FilmStorage{
         if (noFilmForUpdate) {
             throw new ValidationException("Фильм с id " + film.getId() + " не найден.");
         }
-        log.info("Обновленный фильм: {}", film);
+
         return film;
     }
 

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -22,39 +23,42 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User create(User user) {
+    public User createUser(User user) {
         User newUser = userValidation(user);
-        userStorage.create(newUser);
+        newUser = userStorage.create(newUser);
         log.info("Пользователь: {}", newUser);
         return newUser;
     }
 
-    public void delete(int userId) {
-        if (userStorage.findUserById(userId) != null) {
-            userStorage.delete(userId);
-            log.info("Пользователь с id {} удалён.", userId);
+    public User updateUser(User user) {
+        User updatedUser = userValidation(user);
+        if (userStorage.findUserById(updatedUser.getId()) != null) {
+            updatedUser = userStorage.update(updatedUser);
+            log.info("Обновленный пользователь: {}", updatedUser);
         }
-    }
-
-    public User update(User user) {
-        User updateUser = userValidation(user);
-        if (userStorage.findUserById(updateUser.getId()) != null) {
-            userStorage.update(updateUser);
-            log.info("Обновленный пользователь: {}", updateUser);
-        }
-        return updateUser;
+        return updatedUser;
     }
 
     public List<User> findAll() {
         return userStorage.findAll();
     }
 
+    public User getUser(int id) {
+        return userValidation(userStorage.findUserById(id));
+    }
+
+    public void deleteUser(int id) {
+        if (userStorage.findUserById(id) != null) {
+            userStorage.delete(id);
+            log.info("Пользователь с id {} удалён.", id);
+        }
+    }
+
     public void addFriend(int userId, int friendId) {
         if (checkFriendValidation(userId, friendId)) {
             if (userStorage.findUserById(userId).getFriends().contains(friendId)) {
                 log.info("Пользователи {} и {} уже друзья!", userId, friendId);
-            } else
-            {
+            } else {
                 userStorage.addFriend(userId, friendId);
                 userStorage.addFriend(friendId, userId);
                 log.info("Пользователи {} и {} подружились", userId, friendId);
@@ -74,27 +78,10 @@ public class UserService {
         }
     }
 
-
-    private boolean checkFriendValidation(int userId, int friendId) {
-        if (userId == friendId) {
-            log.info("Пользователю {} нельзя дружить самому с собой", userId);
-            return false;
-        }
-        if (userStorage.findUserById(userId) == null) {
-            log.info("Пользователь {} не найден", userId);
-            return false;
-        }
-        if (userStorage.findUserById(friendId) == null) {
-            log.info("Друг {} не найден", friendId);
-            return false;
-        }
-        return true;
-    }
-
-      public List<User> getFriendList(int id) {
+    public List<User> getFriendList(int id) {
         User user = userValidation(userStorage.findUserById(id));
         List<User> friends = new ArrayList<>();
-        for(Integer friendId: user.getFriends()){
+        for (Integer friendId : user.getFriends()) {
             friends.add(userStorage.findUserById(friendId));
         }
         return friends;
@@ -103,18 +90,15 @@ public class UserService {
     public List<User> getFriendsCommonSet(int id, int otherId) {
         User firstUser = userValidation(userStorage.findUserById(id));
         User secondUser = userValidation(userStorage.findUserById(otherId));
-       Set<Integer> intersection = new HashSet<>(firstUser.getFriends());
-       intersection.retainAll(secondUser.getFriends());
+        Set<Integer> intersection = new HashSet<>(firstUser.getFriends());
+        intersection.retainAll(secondUser.getFriends());
         List<User> friends = new ArrayList<>();
-        for(Integer friendId: intersection){
+        for (Integer friendId : intersection) {
             friends.add(userStorage.findUserById(friendId));
         }
         return friends;
     }
 
-    public User getUser(int userId) {
-        return userValidation(userStorage.findUserById(userId));
-    }
 
     private User userValidation(User user) {
         if (user.getEmail() == null || user.getEmail().isEmpty()) {
@@ -136,5 +120,21 @@ public class UserService {
             user.setName(user.getLogin());
         }
         return user;
+    }
+
+    private boolean checkFriendValidation(int userId, int friendId) {
+        if (userId == friendId) {
+            log.error("Пользователю {} нельзя дружить самому с собой", userId);
+            throw new ValidationException("Пользователю" + userId +" нельзя дружить самому с собой");
+        }
+        if (userStorage.findUserById(userId) == null) {
+            log.error("Пользователь {} не найден", userId);
+            throw new NotFoundException("Пользователь" + userId + " не найден");
+        }
+        if (userStorage.findUserById(friendId) == null) {
+            log.error("Друг {} не найден", friendId);
+            throw new NotFoundException("Друг" + friendId + " не найден");
+        }
+        return true;
     }
 }
