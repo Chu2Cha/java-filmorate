@@ -126,7 +126,7 @@ public class UserService {
     private boolean checkFriendValidation(int userId, int friendId) {
         if (userId == friendId) {
             log.error("Пользователю {} нельзя дружить самому с собой", userId);
-            throw new ValidationException("Пользователю" + userId +" нельзя дружить самому с собой");
+            throw new ValidationException("Пользователю" + userId + " нельзя дружить самому с собой");
         }
         if (findUserById(userId) == null) {
             log.error("Пользователь {} не найден", userId);
@@ -139,8 +139,8 @@ public class UserService {
         return true;
     }
 
-    private User findUserById(int id){
-        if(userStorage.findUserById(id)!=null){
+    private User findUserById(int id) {
+        if (userStorage.findUserById(id) != null) {
             return userStorage.findUserById(id);
         } else
             throw new NotFoundException("Пользователь с id " + id + " не найден.");

@@ -14,7 +14,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private Set<Integer> likedUsers =new HashSet<>();
+    private Set<Integer> likedUsers = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
@@ -28,13 +28,16 @@ public class Film {
     public int hashCode() {
         return Objects.hash(id);
     }
-    public void addLike(int userId){
+
+    public void addLike(int userId) {
         likedUsers.add(userId);
     }
-    public void removeLike(int userId){
+
+    public void removeLike(int userId) {
         likedUsers.remove(userId);
     }
-    public int countLikes(){
+
+    public int countLikes() {
         return likedUsers.size();
     }
 }

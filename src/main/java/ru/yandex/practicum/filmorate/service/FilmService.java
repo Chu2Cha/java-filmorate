@@ -101,9 +101,9 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(int count) {
-       List<Film> sortedFilms = new ArrayList<>(findAll());
+        List<Film> sortedFilms = new ArrayList<>(findAll());
         sortedFilms.sort(Comparator.comparingInt(Film::countLikes).reversed());
         int cut = Math.min(count, sortedFilms.size());
-        return sortedFilms.subList(0,cut);
+        return sortedFilms.subList(0, cut);
     }
 }
