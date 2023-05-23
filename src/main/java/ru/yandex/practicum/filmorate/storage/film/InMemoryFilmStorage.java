@@ -31,17 +31,11 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public Film updateFilm(Film film) {
-        boolean noFilmForUpdate = true;
         for (int i = 0; i < films.size(); i++) {
-            if (filmValidation(film).equals(films.get(i))) {
-                films.set(i, filmValidation(film));
-                noFilmForUpdate = false;
+            if (film.equals(films.get(i))) {
+                films.set(i, film);
             }
         }
-        if (noFilmForUpdate) {
-            throw new ValidationException("Фильм с id " + film.getId() + " не найден.");
-        }
-
         return film;
     }
 
@@ -57,27 +51,6 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public List<Film> findAllFilms() {
-        return films;
-    }
-
-    private Film filmValidation(Film film) {
-        if (film.getName() == null || film.getName().isEmpty()) {
-            throw new ValidationException("Название фильма не может быть пустым.");
-        }
-        if (film.getDescription() == null || film.getDescription().length() > 200) {
-            throw new ValidationException("У фильма должно быть описание, но не длиннее 200 символов.");
-        }
-        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Дата релиза фильма не может быть пустой и должна быть не раньше 28.12.1895");
-        }
-        if (film.getDuration() <= 0) {
-            throw new ValidationException("Продолжительность фильма должна быть положительной.");
-        }
-        return film;
-    }
-
-    public List<Film> findAll() {
-        log.info("Количество фильмов: {}", films.size());
         return films;
     }
 }
