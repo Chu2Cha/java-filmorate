@@ -22,7 +22,7 @@ public class UserController {
 
     @GetMapping
     public List<User> findAll() {
-        return userService.findAll();
+        return userService.findAllUsers();
     }
 
     @PostMapping
@@ -37,7 +37,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") int id) {
-        userService.deleteUser(id);
+        userService.removeUser(id);
     }
 
     @GetMapping("/{id}")

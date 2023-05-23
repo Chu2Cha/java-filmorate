@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Component
@@ -19,33 +18,19 @@ public class InMemoryFilmStorage implements FilmStorage{
     private final List<Film> films = new ArrayList<>();
 
     @Override
-    public Film create(Film film) {
+    public Film createFilm(Film film) {
         film.setId(id++);
         films.add(film);
         return film;
     }
 
     @Override
-    public void delete(int filmId) {
-        boolean notFound = true;
-        Iterator<Film> iterator = films.iterator();
-        while (iterator.hasNext()) {
-            Film film = iterator.next();
-            if (film.getId() == filmId) {
-                iterator.remove();
-                films.remove(film);
-                notFound = false;
-                log.info("Фильм с id {} удалён.", filmId);
-                break;
-            }
-        }
-        if (notFound) {
-            throw new ValidationException("Фильм с id " + filmId + " не найден.");
-        }
+    public void removeFilm(int filmId) {
+        films.removeIf(film -> film.getId() == filmId);
     }
 
     @Override
-    public Film update(Film film) {
+    public Film updateFilm(Film film) {
         boolean noFilmForUpdate = true;
         for (int i = 0; i < films.size(); i++) {
             if (filmValidation(film).equals(films.get(i))) {
@@ -58,6 +43,21 @@ public class InMemoryFilmStorage implements FilmStorage{
         }
 
         return film;
+    }
+
+    @Override
+    public Film findFilmById(int id) {
+        for (Film film : films) {
+            if (film.getId() == id) {
+                return film;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<Film> findAllFilms() {
+        return films;
     }
 
     private Film filmValidation(Film film) {

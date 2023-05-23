@@ -2,37 +2,48 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
+import java.util.*;
 
 @Service
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserService userService;
 
-    public FilmService(FilmStorage filmStorage) {
+
+    public FilmService(FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
+        this.userService = userService;
     }
 
-    public Film createFilm (Film film){
+    public Film createFilm(Film film) {
         Film newFilm = filmValidation(film);
-        filmStorage.create(newFilm);
+        filmStorage.createFilm(newFilm);
         log.info("Фильм: {}", newFilm);
         return newFilm;
     }
 
-    public Film updateFilm(Film film){
+    public Film updateFilm(Film film) {
         Film updatedFilm = filmValidation(film);
-        updatedFilm=filmStorage.update(updatedFilm);
-        log.info("Обновленный фильм: {}", film);
+        if (findFilmById(updatedFilm.getId()) != null) {
+            updatedFilm = filmStorage.updateFilm(updatedFilm);
+            log.info("Обновленный фильм: {}", film);
+        }
         return updatedFilm;
     }
 
-    public void removeFilm(Film film){
-
+    public void removeFilm(int id) {
+        if (findFilmById(id) != null) {
+            filmStorage.removeFilm(id);
+            log.info("Фильм с id {} удалён.", id);
+        }
     }
 
     private Film filmValidation(Film film) {
@@ -49,5 +60,50 @@ public class FilmService {
             throw new ValidationException("Продолжительность фильма должна быть положительной.");
         }
         return film;
+    }
+
+    private Film findFilmById(int id) {
+        if (filmStorage.findFilmById(id) != null) {
+            return filmStorage.findFilmById(id);
+        } else
+            throw new NotFoundException("Фильм с id " + id + " не найден.");
+    }
+
+    public List<Film> findAll() {
+        log.info("Количество фильмов: {}", filmStorage.findAllFilms().size());
+        return filmStorage.findAllFilms();
+    }
+
+    public void addLike(int id, int userId) {
+        User user = userService.getUser(userId);
+        Film film = findFilmById(id);
+        if (film.getLikedUsers().contains(userId)) {
+            log.error("Пользователю {} нельзя ставить больше одного лайка фильму {}.", user.getName(), film.getName());
+        } else {
+            film.addLike(userId);
+            log.info("Пользователь {} поставил лайк фильму {}.", user.getName(), film.getName());
+        }
+    }
+
+    public Film getFilm(int id) {
+        return findFilmById(id);
+    }
+
+    public void removeLike(int id, int userId) {
+        User user = userService.getUser(userId);
+        Film film = findFilmById(id);
+        if (film.getLikedUsers().contains(userId)) {
+            film.removeLike(userId);
+            log.info("Пользователь {} удалил лайк фильму {}.", user.getName(), film.getName());
+        } else {
+            log.error("Пользователь {} не лайкал фильм {}.", user.getName(), film.getName());
+        }
+    }
+
+    public List<Film> getPopularFilms(int count) {
+       List<Film> sortedFilms = new ArrayList<>(findAll());
+        sortedFilms.sort(Comparator.comparingInt(Film::countLikes).reversed());
+        int cut = Math.min(count, sortedFilms.size());
+        return sortedFilms.subList(0,cut);
     }
 }

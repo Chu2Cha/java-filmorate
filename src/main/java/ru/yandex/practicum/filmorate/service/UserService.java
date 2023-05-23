@@ -25,7 +25,7 @@ public class UserService {
 
     public User createUser(User user) {
         User newUser = userValidation(user);
-        newUser = userStorage.create(newUser);
+        newUser = userStorage.createUser(newUser);
         log.info("Пользователь: {}", newUser);
         return newUser;
     }
@@ -33,23 +33,24 @@ public class UserService {
     public User updateUser(User user) {
         User updatedUser = userValidation(user);
         if (findUserById(updatedUser.getId()) != null) {
-            updatedUser = userStorage.update(updatedUser);
+            updatedUser = userStorage.updateUser(updatedUser);
             log.info("Обновленный пользователь: {}", updatedUser);
         }
         return updatedUser;
     }
 
-    public List<User> findAll() {
-        return userStorage.findAll();
+    public List<User> findAllUsers() {
+        log.info("Количество пользователей: {}", userStorage.findAllUsers().size());
+        return userStorage.findAllUsers();
     }
 
     public User getUser(int id) {
-        return userValidation(findUserById(id));
+        return findUserById(id);
     }
 
-    public void deleteUser(int id) {
+    public void removeUser(int id) {
         if (findUserById(id) != null) {
-            userStorage.delete(id);
+            userStorage.removeUser(id);
             log.info("Пользователь с id {} удалён.", id);
         }
     }
