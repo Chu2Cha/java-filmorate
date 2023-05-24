@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -28,46 +29,39 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        for (int i = 0; i < users.size(); i++) {
-            if (user.equals(users.get(i))) {
-                users.set(i, user);
-                break;
-            }
-        }
+        users.stream()
+                .filter(u -> u.equals(user))
+                .findFirst()
+                .ifPresent(u -> users.set(users.indexOf(u), user));
         return user;
     }
 
     @Override
     public List<User> findAllUsers() {
-        return users;
+        return new ArrayList<>(users);
     }
 
     @Override
     public User findUserById(int id) {
-        for (User user : users) {
-            if (user.getId() == id) {
-                return user;
-            }
-        }
-        return null;
+        Optional<User> optionalUser = users.stream()
+                .filter(u -> u.getId() == id)
+                .findFirst();
+        return optionalUser.orElse(null);
     }
 
     @Override
     public void addFriend(int first, int second) {
-        for (User user : users) {
-            if (user.getId() == first) {
-                user.addFriend(second);
-                break;
-            }
-        }
+        users.stream()
+                .filter(u -> u.getId() == first)
+                .findFirst()
+                .ifPresent(u -> u.addFriend(second));
     }
 
     @Override
     public void removeFriend(int first, int second) {
-        for (User user : users) {
-            if (user.getId() == first) {
-                user.removeFriend(second);
-            }
-        }
+        users.stream()
+                .filter(u -> u.getId() == first)
+                .findFirst()
+                .ifPresent(u -> u.removeFriend(second));
     }
 }

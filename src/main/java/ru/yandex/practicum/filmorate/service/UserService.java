@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -32,16 +29,16 @@ public class UserService {
 
     public User updateUser(User user) {
         User updatedUser = userValidation(user);
-        if (findUserById(updatedUser.getId()) != null) {
-            updatedUser = userStorage.updateUser(updatedUser);
-            log.info("Обновленный пользователь: {}", updatedUser);
-        }
+        findUserById(updatedUser.getId());
+        updatedUser = userStorage.updateUser(updatedUser);
+        log.info("Обновленный пользователь: {}", updatedUser);
         return updatedUser;
     }
 
     public List<User> findAllUsers() {
-        log.info("Количество пользователей: {}", userStorage.findAllUsers().size());
-        return userStorage.findAllUsers();
+        List<User> users = new ArrayList<>(userStorage.findAllUsers());
+        log.info("Количество пользователей: {}", users.size());
+        return users;
     }
 
     public User getUser(int id) {
@@ -49,10 +46,9 @@ public class UserService {
     }
 
     public void removeUser(int id) {
-        if (findUserById(id) != null) {
-            userStorage.removeUser(id);
-            log.info("Пользователь с id {} удалён.", id);
-        }
+        findUserById(id);
+        userStorage.removeUser(id);
+        log.info("Пользователь с id {} удалён.", id);
     }
 
     public void addFriend(int userId, int friendId) {
@@ -100,6 +96,10 @@ public class UserService {
         return friends;
     }
 
+    private User findUserById(int id) {
+        return Optional.ofNullable(userStorage.findUserById(id))
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден."));
+    }
 
     private User userValidation(User user) {
         if (user.getEmail() == null || user.getEmail().isEmpty()) {
@@ -137,12 +137,5 @@ public class UserService {
             throw new NotFoundException("Друг" + friendId + " не найден");
         }
         return true;
-    }
-
-    private User findUserById(int id) {
-        if (userStorage.findUserById(id) != null) {
-            return userStorage.findUserById(id);
-        } else
-            throw new NotFoundException("Пользователь с id " + id + " не найден.");
     }
 }
