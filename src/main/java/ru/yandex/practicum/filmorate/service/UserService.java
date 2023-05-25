@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -76,24 +77,19 @@ public class UserService {
     }
 
     public List<User> getFriendList(int id) {
-        User user = userValidation(findUserById(id));
-        List<User> friends = new ArrayList<>();
-        for (Integer friendId : user.getFriends()) {
-            friends.add(findUserById(friendId));
-        }
-        return friends;
+        return findUserById(id).getFriends().stream()
+                .map(this::findUserById)
+                .collect(Collectors.toList());
     }
 
-    public List<User> getFriendsCommonSet(int id, int otherId) {
-        User firstUser = userValidation(findUserById(id));
-        User secondUser = userValidation(findUserById(otherId));
+    public List<User> getFriendsCommonList(int id, int otherId) {
+        User firstUser = findUserById(id);
+        User secondUser = findUserById(otherId);
         Set<Integer> intersection = new HashSet<>(firstUser.getFriends());
         intersection.retainAll(secondUser.getFriends());
-        List<User> friends = new ArrayList<>();
-        for (Integer friendId : intersection) {
-            friends.add(findUserById(friendId));
-        }
-        return friends;
+        return intersection.stream()
+                .map(this::findUserById)
+                .collect(Collectors.toList());
     }
 
     private User findUserById(int id) {
