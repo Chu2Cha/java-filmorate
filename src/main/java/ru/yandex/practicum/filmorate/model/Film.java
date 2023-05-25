@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -12,6 +14,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
+    private Set<Integer> likedUsers = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
@@ -24,5 +27,17 @@ public class Film {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public void addLike(int userId) {
+        likedUsers.add(userId);
+    }
+
+    public void removeLike(int userId) {
+        likedUsers.remove(userId);
+    }
+
+    public int countLikes() {
+        return likedUsers.size();
     }
 }

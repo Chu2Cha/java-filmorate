@@ -2,72 +2,67 @@ package ru.yandex.practicum.filmorate.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @Slf4j
+@RequestMapping("/users")
 public class UserController {
-    private int id = 1;
+    @Autowired
+    private final UserService userService;
 
-    private final List<User> users = new ArrayList<>();
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> findAll() {
-        log.info("Количество пользователей: {}", users.size());
-        return users;
+        return userService.findAllUsers();
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public User create(@RequestBody User user) {
-        User newUser = userValidation(user);
-        newUser.setId(id++);
-        users.add(newUser);
-        log.info("Пользователь: {}", newUser);
-        return newUser;
+        return userService.createUser(user);
     }
 
-    @PutMapping("/users")
-    public User updateUser(@RequestBody User user) {
-        boolean noUsersForUpdate = true;
-        for (int i = 0; i < users.size(); i++) {
-            if (userValidation(user).equals(users.get(i))) {
-                users.set(i, userValidation(user));
-                noUsersForUpdate = false;
-            }
-        }
-        if (noUsersForUpdate) {
-            throw new ValidationException("Пользователь с id " + user.getId() + " не найден.");
-        }
-        log.info("Обновленный пользователь: {}", user);
-        return user;
+    @PutMapping
+    public User update(@RequestBody User user) {
+        return userService.updateUser(user);
     }
 
-    private User userValidation(User user) {
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
-            throw new ValidationException("Почта не может быть пустой!");
-        }
-        if (!(user.getEmail().contains("@"))) {
-            throw new ValidationException("Почта должна содержать символ @.");
-        }
-        if (user.getLogin() == null || user.getLogin().isEmpty()) {
-            throw new ValidationException("Логин не может быть пустым!");
-        }
-        if (user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может содержать пробелы!");
-        }
-        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения должна быть раньше сегодняшнего дня.");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        return user;
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") int id) {
+        userService.removeUser(id);
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable("id") int id) {
+        return userService.getUser(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getUserFriends(@PathVariable("id") int id) {
+        return userService.getFriendList(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable("id") int id, @PathVariable("friendId") int friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable("id") int id, @PathVariable("friendId") int friendId) {
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getUserCommonFriends(@PathVariable("id") int id, @PathVariable("otherId") int otherId) {
+        return userService.getFriendsCommonList(id, otherId);
     }
 
 }

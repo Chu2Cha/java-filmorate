@@ -1,14 +1,32 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
+    FilmController filmController;
+    UserController userController;
+
+    @BeforeEach
+    public void start() {
+        UserStorage userStorage = new InMemoryUserStorage();
+        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+        UserService userService = new UserService(userStorage);
+        FilmService filmService = new FilmService(filmStorage, userService);
+        filmController = new FilmController(filmService);
+        userController = new UserController(userService);
+    }
 
     private Film createFilmForTest(String name, String description, int duration, LocalDate releaseDate) {
         Film film = new Film();
@@ -29,7 +47,6 @@ class FilmControllerTest {
                 "Комедия Квартета И об одном дне из жизни радиостанции",
                 98,
                 LocalDate.of(2008, 3, 20));
-        FilmController filmController = new FilmController();
         filmController.create(film1);
         assertEquals(1, filmController.findAll().size());
         filmController.create(film2);
@@ -42,10 +59,9 @@ class FilmControllerTest {
                 "Комедия Квартета И о выборах",
                 154,
                 LocalDate.of(2007, 10, 18));
-        FilmController filmController = new FilmController();
         filmController.create(film1);
         assertEquals("[Film(id=1, name=День выборов, description=Комедия Квартета И о выборах, " +
-                "releaseDate=2007-10-18, duration=154)]", filmController.findAll().toString());
+                "releaseDate=2007-10-18, duration=154, likedUsers=[])]", filmController.findAll().toString());
     }
 
     @Test
@@ -54,22 +70,20 @@ class FilmControllerTest {
                 "Комедия Квартета И о выборах",
                 154,
                 LocalDate.of(2007, 10, 18));
-        FilmController filmController = new FilmController();
         filmController.create(film1);
         assertEquals("[Film(id=1, name=День выборов, description=Комедия Квартета И о выборах, " +
-                "releaseDate=2007-10-18, duration=154)]", filmController.findAll().toString());
+                "releaseDate=2007-10-18, duration=154, likedUsers=[])]", filmController.findAll().toString());
         film1.setName("День выборов 2");
         film1.setReleaseDate(LocalDate.of(2016, 4, 4));
         film1.setDuration(105);
-        filmController.updateFilm(film1);
+        filmController.update(film1);
         assertEquals("[Film(id=1, name=День выборов 2, description=Комедия Квартета И о выборах, " +
-                "releaseDate=2016-04-04, duration=105)]", filmController.findAll().toString());
+                "releaseDate=2016-04-04, duration=105, likedUsers=[])]", filmController.findAll().toString());
     }
 
     @Test
     void shuldFailAndPassAfterUpdate() {
         Film film = new Film();
-        FilmController filmController = new FilmController();
         assertThrows(ValidationException.class, () -> filmController.create(film));
         film.setName(" ");
         assertThrows(ValidationException.class, () -> filmController.create(film));
@@ -115,13 +129,13 @@ class FilmControllerTest {
         assertThrows(ValidationException.class, () -> filmController.create(film));
         film.setReleaseDate(LocalDate.of(1808, 12, 12));
         assertThrows(ValidationException.class, () -> filmController.create(film));
-        film.setReleaseDate(LocalDate.of(2023,4,1));
+        film.setReleaseDate(LocalDate.of(2023, 4, 1));
         assertThrows(ValidationException.class, () -> filmController.create(film));
         film.setDuration(-5);
         assertThrows(ValidationException.class, () -> filmController.create(film));
         film.setDuration(55);
         filmController.create(film);
         assertEquals("[Film(id=1, name=Normal film name, description=Normal film description, " +
-                "releaseDate=2023-04-01, duration=55)]", filmController.findAll().toString());
+                "releaseDate=2023-04-01, duration=55, likedUsers=[])]", filmController.findAll().toString());
     }
 }
