@@ -15,6 +15,7 @@ public class Film {
     private LocalDate releaseDate;
     private int duration;
     private Set<Integer> likedUsers = new HashSet<>();
+    private String mpa;
 
     @Override
     public boolean equals(Object o) {
