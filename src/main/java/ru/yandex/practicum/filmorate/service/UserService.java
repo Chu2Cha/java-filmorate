@@ -54,11 +54,10 @@ public class UserService {
 
     public void addFriend(int userId, int friendId) {
         if (checkFriendValidation(userId, friendId)) {
-            if (findUserById(userId).getFriends().contains(friendId)) {
+            if (userStorage.getFriends(userId).contains(friendId)) {
                 log.info("Пользователи {} и {} уже друзья!", userId, friendId);
             } else {
                 userStorage.addFriend(userId, friendId);
-                userStorage.addFriend(friendId, userId);
                 log.info("Пользователи {} и {} подружились", userId, friendId);
             }
         }
@@ -66,7 +65,7 @@ public class UserService {
 
     public void removeFriend(int userId, int friendId) {
         if (checkFriendValidation(userId, friendId)) {
-            if (!findUserById(userId).getFriends().contains(friendId)) {
+            if (!userStorage.getFriends(userId).contains(friendId)) {
                 log.info("Пользователи {} и {} не дружат.", userId, friendId);
             } else {
                 userStorage.removeFriend(userId, friendId);
@@ -77,16 +76,14 @@ public class UserService {
     }
 
     public List<User> getFriendList(int id) {
-        return findUserById(id).getFriends().stream()
+        return userStorage.getFriends(id).stream()
                 .map(this::findUserById)
                 .collect(Collectors.toList());
     }
 
     public List<User> getFriendsCommonList(int id, int otherId) {
-        User firstUser = findUserById(id);
-        User secondUser = findUserById(otherId);
-        Set<Integer> intersection = new HashSet<>(firstUser.getFriends());
-        intersection.retainAll(secondUser.getFriends());
+        Set<Integer> intersection = new HashSet<>(userStorage.getFriends(id));
+        intersection.retainAll(userStorage.getFriends(otherId));
         return intersection.stream()
                 .map(this::findUserById)
                 .collect(Collectors.toList());

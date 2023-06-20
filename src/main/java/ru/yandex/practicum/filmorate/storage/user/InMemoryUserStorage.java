@@ -49,17 +49,22 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void addFriend(int first, int second) {
-        users.stream()
-                .filter(u -> u.getId() == first)
-                .findFirst()
-                .ifPresent(u -> u.addFriend(second));
+//        users.stream()
+//                .filter(u -> u.getId() == first)
+//                .findFirst()
+//                .ifPresent(u -> u.addFriend(second));
     }
 
     @Override
     public void removeFriend(int first, int second) {
-        users.stream()
-                .filter(u -> u.getId() == first)
-                .findFirst()
-                .ifPresent(u -> u.removeFriend(second));
+//        users.stream()
+//                .filter(u -> u.getId() == first)
+//                .findFirst()
+//                .ifPresent(u -> u.removeFriend(second));
+    }
+
+    @Override
+    public List<Integer> getFriends(int userId) {
+        return null;
     }
 }

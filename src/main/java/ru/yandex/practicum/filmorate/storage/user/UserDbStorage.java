@@ -2,71 +2,118 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.util.List;
+import java.util.*;
 
 
 @Primary
-public class UserDbStorage implements UserStorage{
+@Component
+public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
     @Override
     public User createUser(User user) {
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement
-                    ("INSERT INTO USERS (EMAIL, LOGIN, NAME, BIRTHDAY) VALUES (?, ?, ?, ?)",
-                            Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getLogin());
-            ps.setString(3, user.getName());
-            ps.setDate(4, Date.valueOf(user.getBirthday()));
-            return ps;
-        }, keyHolder);
-        user.setId(keyHolder.getKey().intValue());
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("USERS")
+                .usingGeneratedKeyColumns("USER_ID");
+        user.setId(simpleJdbcInsert.executeAndReturnKey(user.toMap()).intValue());
         return user;
     }
 
     @Override
     public void removeUser(int userId) {
-        jdbcTemplate.update("DELETE FROM USERS WHERE USER_ID = ?",userId);
+        jdbcTemplate.update("DELETE FROM USERS WHERE USER_ID = ?", userId);
     }
 
     @Override
     public User updateUser(User user) {
-        return null;
+        String sql = "UPDATE USERS SET EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY = ? WHERE USER_ID = ?";
+        jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
+        return user;
     }
 
     @Override
     public List<User> findAllUsers() {
-        return null;
+        String sqlQuery = "SELECT * FROM USERS";
+        SqlRowSet srs = jdbcTemplate.queryForRowSet(sqlQuery);
+        List<User> users = new ArrayList<>();
+        while (srs.next()){
+            users.add(mapRowToUser(srs));
+        }
+        return users;
     }
 
     @Override
     public User findUserById(int id) {
-        return null;
+        String sqlQuery = "SELECT * FROM USERS WHERE USER_ID = ?";
+        SqlRowSet srs = jdbcTemplate.queryForRowSet(sqlQuery, id);
+        if (srs.next()) {
+            return mapRowToUser(srs);
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void addFriend(int first, int second) {
-
+            List<Map<String, Object>> result =
+                    jdbcTemplate.queryForList("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",
+                            second, first);
+            if(result.isEmpty()){
+                jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIEND_STATUS) VALUES (?, ?, ?)",
+                        first, second, false);
+            }
+            else {
+                jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
+                        true, first, second);
+                jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
+                        true, second, first);
+            }
     }
 
     @Override
     public void removeFriend(int first, int second) {
+        jdbcTemplate.update("DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?", first, second);
+        jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS= ? WHERE USER_ID = ? AND  FRIEND_ID = ?",
+                false, second,first);
+    }
+    @Override
+    public List<Integer> getFriends(int userId){
+        String sqlQuery = "SELECT * FROM USERS INNER JOIN FRIENDS F on USERS.USER_ID = F.FRIEND_ID WHERE F.USER_ID = ?";
+        SqlRowSet srs = jdbcTemplate.queryForRowSet(sqlQuery, userId);
+        List<Integer>friends = new ArrayList<>();
+        while (srs.next()){
+            friends.add(mapRowToUser(srs).getId());
+        }
+        return friends;
+    }
 
+    public boolean getFriendStatus(int first, int second){
+        List<Map<String,Object>> result = jdbcTemplate.queryForList
+                ("SELECT FRIEND_STATUS FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",first,second);
+        if(result.isEmpty()){
+            return false;
+        }
+        else {
+            return (boolean) result.get(0).get("FRIEND_STATUS");
+        }
+    }
+
+    private static User mapRowToUser(SqlRowSet srs) {
+        return User.builder()
+                .id(srs.getInt("USER_ID"))
+                .name(srs.getString("NAME"))
+                .login(srs.getString("LOGIN"))
+                .email(srs.getString("EMAIL"))
+                .birthday(Objects.requireNonNull(srs.getDate("BIRTHDAY")).toLocalDate())
+                .build();
     }
 }
