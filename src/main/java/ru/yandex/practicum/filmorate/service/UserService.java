@@ -58,7 +58,7 @@ public class UserService {
                 log.info("Пользователи {} и {} уже друзья!", userId, friendId);
             } else {
                 userStorage.addFriend(userId, friendId);
-                log.info("Пользователи {} и {} подружились", userId, friendId);
+                log.info("Пользователь {} подружился с  {}", userId, friendId);
             }
         }
     }
@@ -69,8 +69,7 @@ public class UserService {
                 log.info("Пользователи {} и {} не дружат.", userId, friendId);
             } else {
                 userStorage.removeFriend(userId, friendId);
-                userStorage.removeFriend(friendId, userId);
-                log.info("Пользователи {} и {} пересати дружить", userId, friendId);
+                log.info("Пользователь {} перестал дружить с {}.", userId, friendId);
             }
         }
     }
