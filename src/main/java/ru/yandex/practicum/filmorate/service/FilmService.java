@@ -50,13 +50,13 @@ public class FilmService {
         return allFilms;
     }
 
-    public void addLike(int id, int userId) {
+    public void addLike(int filmId, int userId) {
         User user = userService.getUser(userId);
-        Film film = findFilmById(id);
-        if (film.getLikedUsers().contains(userId)) {
+        Film film = findFilmById(filmId);
+        if (filmStorage.userLikedFilm(userId, filmId)) {
             log.error("Пользователю {} нельзя ставить больше одного лайка фильму {}.", user.getName(), film.getName());
         } else {
-            film.addLike(userId);
+            filmStorage.addLike(userId, filmId);
             log.info("Пользователь {} поставил лайк фильму {}.", user.getName(), film.getName());
         }
     }
@@ -65,11 +65,11 @@ public class FilmService {
         return findFilmById(id);
     }
 
-    public void removeLike(int id, int userId) {
+    public void removeLike(int filmId, int userId) {
         User user = userService.getUser(userId);
-        Film film = findFilmById(id);
-        if (film.getLikedUsers().contains(userId)) {
-            film.removeLike(userId);
+        Film film = findFilmById(filmId);
+        if (filmStorage.userLikedFilm(userId, filmId)) {
+            filmStorage.removeLike(userId, filmId);
             log.info("Пользователь {} удалил лайк фильму {}.", user.getName(), film.getName());
         } else {
             log.error("Пользователь {} не лайкал фильм {}.", user.getName(), film.getName());
@@ -77,10 +77,8 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(int count) {
-        List<Film> sortedFilms = new ArrayList<>(findAll());
-        sortedFilms.sort(Comparator.comparingInt(Film::countLikes).reversed());
-        int cut = Math.min(count, sortedFilms.size());
-        return sortedFilms.subList(0, cut);
+        List<Film> sortedFilms = new ArrayList<>(filmStorage.getPopular(count));
+        return sortedFilms;
     }
 
     private Film findFilmById(int id) {
