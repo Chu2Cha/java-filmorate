@@ -1,33 +1,57 @@
 //package ru.yandex.practicum.filmorate.controller;
 //
+//import lombok.RequiredArgsConstructor;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.jdbc.core.JdbcTemplate;
 //import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 //import ru.yandex.practicum.filmorate.model.Film;
+//import ru.yandex.practicum.filmorate.model.User;
 //import ru.yandex.practicum.filmorate.service.FilmService;
 //import ru.yandex.practicum.filmorate.service.UserService;
-//import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-//import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+//import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+//import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+//import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 //import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 //
 //import java.time.LocalDate;
+//import java.util.Optional;
 //
 //import static org.junit.jupiter.api.Assertions.*;
 //
+//@SpringBootTest
+//@AutoConfigureTestDatabase
+//@RequiredArgsConstructor(onConstructor_ = @Autowired)
 //class FilmControllerTest {
 //    FilmController filmController;
 //    UserController userController;
+//    JdbcTemplate jdbcTemplate;
+//    UserStorage userStorage;
+//
 //
 //    @BeforeEach
 //    public void start() {
-//        UserStorage userStorage = new InMemoryUserStorage();
-//        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+//        userStorage = new UserDbStorage(jdbcTemplate);
+//        FilmStorage filmStorage =  new FilmDbStorage(jdbcTemplate);
 //        UserService userService = new UserService(userStorage);
 //        FilmService filmService = new FilmService(filmStorage, userService);
 //        filmController = new FilmController(filmService);
 //        userController = new UserController(userService);
 //    }
+//    @Test
+//    public void testFindUserById() {
 //
+//        Optional<User> userOptional = userStorage.findUserById(1);
+//
+//        assertThat(userOptional)
+//                .isPresent()
+//                .hasValueSatisfying(user ->
+//                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+//                );
+//    }
 //    private Film createFilmForTest(String name, String description, int duration, LocalDate releaseDate) {
 //        Film film = new Film();
 //        film.setName(name);

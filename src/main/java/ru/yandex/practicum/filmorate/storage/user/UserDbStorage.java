@@ -96,16 +96,6 @@ public class UserDbStorage implements UserStorage {
         return friends;
     }
 
-//    public boolean getFriendStatus(int first, int second){
-//        List<Map<String,Object>> result = jdbcTemplate.queryForList
-//                ("SELECT FRIEND_STATUS FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",first,second);
-//        if(result.isEmpty()){
-//            return false;
-//        }
-//        else {
-//            return (boolean) result.get(0).get("FRIEND_STATUS");
-//        }
-//    }
 
     private static User mapRowToUser(SqlRowSet srs) {
         return User.builder()
