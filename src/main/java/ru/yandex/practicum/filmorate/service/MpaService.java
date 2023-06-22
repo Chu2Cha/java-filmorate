@@ -20,7 +20,7 @@ public class MpaService {
         this.mpaDbStorage = mpaDbStorage;
     }
 
-    public Mpa findById(int id){
+    public Mpa findById(int id) {
         return Optional.ofNullable(mpaDbStorage.findById(id))
                 .orElseThrow(() -> new NotFoundException("Рейтинг с id " + id + " не найден."));
     }
