@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jdk.jshell.Snippet;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,15 +14,6 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
-//    private final Set<Integer> friends = new HashSet<>();
-//
-//    public void addFriend(int friendId) {
-//        friends.add(friendId);
-//    }
-//
-//    public void removeFriend(int friendId) {
-//        friends.remove(friendId);
-//    }
 
     @Override
     public boolean equals(Object o) {

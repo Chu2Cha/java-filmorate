@@ -45,7 +45,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "SELECT * FROM USERS";
         SqlRowSet srs = jdbcTemplate.queryForRowSet(sqlQuery);
         List<User> users = new ArrayList<>();
-        while (srs.next()){
+        while (srs.next()) {
             users.add(mapRowToUser(srs));
         }
         return users;
@@ -64,33 +64,33 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int first, int second) {
-            List<Map<String, Object>> result =
-                    jdbcTemplate.queryForList("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",
-                            second, first);
-            if(result.isEmpty()){
-                jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIEND_STATUS) VALUES (?, ?, ?)",
-                        first, second, false);
-            }
-            else {
-                jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
-                        true, first, second);
-                jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
-                        true, second, first);
-            }
+        List<Map<String, Object>> result =
+                jdbcTemplate.queryForList("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",
+                        second, first);
+        if (result.isEmpty()) {
+            jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIEND_STATUS) VALUES (?, ?, ?)",
+                    first, second, false);
+        } else {
+            jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
+                    true, first, second);
+            jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
+                    true, second, first);
+        }
     }
 
     @Override
     public void removeFriend(int first, int second) {
         jdbcTemplate.update("DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?", first, second);
         jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS= ? WHERE USER_ID = ? AND  FRIEND_ID = ?",
-                false, second,first);
+                false, second, first);
     }
+
     @Override
-    public List<Integer> getFriends(int userId){
+    public List<Integer> getFriends(int userId) {
         String sqlQuery = "SELECT * FROM USERS INNER JOIN FRIENDS F on USERS.USER_ID = F.FRIEND_ID WHERE F.USER_ID = ?";
         SqlRowSet srs = jdbcTemplate.queryForRowSet(sqlQuery, userId);
-        List<Integer>friends = new ArrayList<>();
-        while (srs.next()){
+        List<Integer> friends = new ArrayList<>();
+        while (srs.next()) {
             friends.add(mapRowToUser(srs).getId());
         }
         return friends;

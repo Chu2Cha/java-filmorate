@@ -31,11 +31,11 @@ public class Film {
     }
 
     public Set<Genre> getGenres() { //для правильной сортировки во воремя PUT. Правда, я не понял, зачем это нужно
-        try{
+        try {
             Set<Genre> genresFromFilm = new TreeSet<>(new GenreComparator());
             genresFromFilm.addAll(genres);
             return genresFromFilm;
-        } catch (NullPointerException e){ //если у film нет вообще genres, падает NPE
+        } catch (NullPointerException e) { //если у film нет вообще genres, падает NPE
             return new HashSet<>();
         }
     }
