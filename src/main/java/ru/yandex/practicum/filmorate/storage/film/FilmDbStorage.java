@@ -152,12 +152,14 @@ public class FilmDbStorage implements FilmStorage {
 
     private void updateGenre(Film film) {
         Set<Genre> genresFromFilm = getGenresFromFilm(film.getId());
-        if (genresFromFilm.isEmpty()) {  //чтобы не ставить отрицание в выражении
+        if (genresFromFilm.isEmpty()) {
+            doNothing(); //чтобы не ставить плохо читаемое отрицание в выражении
         } else {
             String deleteSql = "DELETE FROM FILM_GENRE WHERE FILM_ID = ?";
             jdbcTemplate.update(deleteSql, film.getId());
         }
         if (film.getGenres() == null || film.getGenres().isEmpty()) {
+            doNothing();
         } else {
             for (Genre genre : film.getGenres()) {
                 String insertSql = "INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID) VALUES (?, ?)";
@@ -165,5 +167,6 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
     }
+    private void doNothing(){}
 
 }
