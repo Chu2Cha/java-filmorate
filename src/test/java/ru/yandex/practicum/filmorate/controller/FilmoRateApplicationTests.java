@@ -59,9 +59,8 @@ class FilmoRateApplicationTests {
                 .duration(120)
                 .build();
         film1.setMpa(new Mpa(1, "G"));
-        film1.setGenres(new HashSet<>(Arrays.asList
-                (new Genre(1, "Комедия"),
-                        new Genre(4, "Триллер"))));
+        film1.setGenres(new HashSet<>(Arrays.asList(new Genre(1, "Комедия"),
+                new Genre(4, "Триллер"))));
         film2 = Film.builder()
                 .name("Film_2")
                 .description("Description_2")
