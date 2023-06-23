@@ -1,19 +1,18 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.Additional.GenresDbStorage;
+import ru.yandex.practicum.filmorate.storage.Additional.MpaDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.data.util.Predicates.isTrue;
 
 
 @SpringBootTest
@@ -33,6 +31,8 @@ import static org.springframework.data.util.Predicates.isTrue;
 class FilmoRateApplicationTests {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final GenresDbStorage genresDbStorage;
+    private final MpaDbStorage mpaDbStorage;
     private User user1;
     private User user2;
     private Film film1;
@@ -58,7 +58,7 @@ class FilmoRateApplicationTests {
                 .releaseDate(LocalDate.of(2020, 2, 12))
                 .duration(120)
                 .build();
-        film1.setMpa(new Mpa(1,"G"));
+        film1.setMpa(new Mpa(1, "G"));
         film1.setGenres(new HashSet<>(Arrays.asList
                 (new Genre(1, "Комедия"),
                         new Genre(4, "Триллер"))));
@@ -68,7 +68,7 @@ class FilmoRateApplicationTests {
                 .releaseDate(LocalDate.of(2023, 3, 30))
                 .duration(180)
                 .build();
-        film2.setMpa(new Mpa(2,"PG"));
+        film2.setMpa(new Mpa(2, "PG"));
     }
 
     @Test
@@ -83,15 +83,16 @@ class FilmoRateApplicationTests {
     }
 
     @Test
-    public void testFindAllUsers(){
+    public void testFindAllUsers() {
         user1 = userStorage.createUser(user1);
         user2 = userStorage.createUser(user2);
         List<User> users = userStorage.findAllUsers();
         assertThat(users.contains(user1)).isTrue();
         assertThat(users.contains(user2)).isTrue();
     }
+
     @Test
-    public void testRemoveUser(){
+    public void testRemoveUser() {
         user1 = userStorage.createUser(user1);
         user2 = userStorage.createUser(user2);
         userStorage.removeUser(user2.getId());
@@ -99,8 +100,9 @@ class FilmoRateApplicationTests {
         assertThat(listUsers.contains(user1)).isTrue();
         assertThat(listUsers.contains(user2)).isFalse();
     }
+
     @Test
-    public void updateUser(){
+    public void updateUser() {
         user1 = userStorage.createUser(user1);
         Optional<User> userBeforeUpdate = Optional.ofNullable(userStorage.findUserById(1));
         assertThat(userBeforeUpdate)
@@ -109,7 +111,7 @@ class FilmoRateApplicationTests {
                         assertThat(user).hasFieldOrPropertyWithValue("name", "Name_1")
                                 .hasFieldOrPropertyWithValue("email", "mail@mail.ru")
                                 .hasFieldOrPropertyWithValue("login", "Login_1")
-                                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(1976,6,10))
+                                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(1976, 6, 10))
                                 .hasFieldOrPropertyWithValue("id", 1)
                 );
         User updatedUser = User.builder()
@@ -127,31 +129,34 @@ class FilmoRateApplicationTests {
                         assertThat(user).hasFieldOrPropertyWithValue("name", "New_name")
                                 .hasFieldOrPropertyWithValue("email", "new@mail.ru")
                                 .hasFieldOrPropertyWithValue("login", "New_login")
-                                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(2000,1,1))
+                                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(2000, 1, 1))
                                 .hasFieldOrPropertyWithValue("id", 1)
                 );
     }
+
     @Test
     public void addFriendOneWayFriendship() {
         user1 = userStorage.createUser(user1);
         user2 = userStorage.createUser(user2);
         userStorage.addFriend(user1.getId(), user2.getId());
-        List<Integer>friendsOfFirst = userStorage.getFriends(user1.getId());
-        List<Integer>friendsOfSecond = userStorage.getFriends(user2.getId());
+        List<Integer> friendsOfFirst = userStorage.getFriends(user1.getId());
+        List<Integer> friendsOfSecond = userStorage.getFriends(user2.getId());
         assertThat(friendsOfFirst.contains(user2.getId())).isTrue();
         assertThat(friendsOfSecond.contains(user1.getId())).isFalse();
     }
+
     @Test
     public void addFriendTwoWaysFriendship() {
         user1 = userStorage.createUser(user1);
         user2 = userStorage.createUser(user2);
         userStorage.addFriend(user1.getId(), user2.getId());
         userStorage.addFriend(user2.getId(), user1.getId());
-        List<Integer>friendsOfFirst = userStorage.getFriends(user1.getId());
-        List<Integer>friendsOfSecond = userStorage.getFriends(user2.getId());
+        List<Integer> friendsOfFirst = userStorage.getFriends(user1.getId());
+        List<Integer> friendsOfSecond = userStorage.getFriends(user2.getId());
         assertThat(friendsOfFirst.contains(user2.getId())).isTrue();
         assertThat(friendsOfSecond.contains(user1.getId())).isTrue();
     }
+
     @Test
     public void removeFriendFromOneUser() {
         user1 = userStorage.createUser(user1);
@@ -164,6 +169,7 @@ class FilmoRateApplicationTests {
         assertThat(friendsOfFirst.contains(user2.getId())).isFalse();
         assertThat(friendsOfSecond.contains(user1.getId())).isTrue();
     }
+
     @Test
     public void testCreateAndFindFilmById() {
         film1 = filmStorage.createFilm(film1);
@@ -176,7 +182,7 @@ class FilmoRateApplicationTests {
     }
 
     @Test
-    public void testFindAllFilms(){
+    public void testFindAllFilms() {
         film1 = filmStorage.createFilm(film1);
         film2 = filmStorage.createFilm(film2);
         List<Film> films = filmStorage.findAllFilms();
@@ -185,7 +191,7 @@ class FilmoRateApplicationTests {
     }
 
     @Test
-    public void testRemoveFilm(){
+    public void testRemoveFilm() {
         film1 = filmStorage.createFilm(film1);
         film2 = filmStorage.createFilm(film2);
         List<Film> films = filmStorage.findAllFilms();
@@ -196,15 +202,16 @@ class FilmoRateApplicationTests {
         assertThat(films).contains(film1);
         assertThat(films).doesNotContain(film2);
     }
+
     @Test
-    public void updateFilm(){
+    public void updateFilm() {
         film1 = filmStorage.createFilm(film1);
         Optional<Film> filmBeforeUpdate = Optional.ofNullable(filmStorage.findFilmById(film1.getId()));
         assertThat(filmBeforeUpdate)
                 .isPresent()
                 .hasValueSatisfying(film ->
                         assertThat(film).hasFieldOrPropertyWithValue("id", film1.getId())
-                               .hasFieldOrPropertyWithValue("name", "Film_1")
+                                .hasFieldOrPropertyWithValue("name", "Film_1")
                                 .hasFieldOrPropertyWithValue("description", "Description_1")
                                 .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2020, 2, 12))
                                 .hasFieldOrPropertyWithValue("duration", 120)
@@ -213,11 +220,11 @@ class FilmoRateApplicationTests {
                 .id(film1.getId())
                 .name("NewFilm")
                 .description("NewDescription")
-                .releaseDate(LocalDate.of(1999 , 12, 12))
+                .releaseDate(LocalDate.of(1999, 12, 12))
                 .duration(90)
                 .build();
-        updatedFilm.setMpa(new Mpa(4,"R"));
-        updatedFilm.setGenres(new HashSet<>(Arrays.asList (new Genre(3, "Мульфильм"))));
+        updatedFilm.setMpa(new Mpa(4, "R"));
+        updatedFilm.setGenres(new HashSet<>(Arrays.asList(new Genre(3, "Мульфильм"))));
         filmStorage.updateFilm(updatedFilm);
         Optional<Film> filmafterUpdate = Optional.ofNullable(filmStorage.findFilmById(film1.getId()));
         assertThat(filmafterUpdate)
@@ -230,8 +237,9 @@ class FilmoRateApplicationTests {
                                 .hasFieldOrPropertyWithValue("duration", 90)
                 );
     }
+
     @Test
-    public void addAdnRemoveLike(){
+    public void addAdnRemoveLike() {
         user1 = userStorage.createUser(user1);
         film1 = filmStorage.createFilm(film1);
         filmStorage.addLike(user1.getId(), film1.getId());
@@ -241,7 +249,7 @@ class FilmoRateApplicationTests {
     }
 
     @Test
-    public void getPopularFilms(){
+    public void getPopularFilms() {
         user1 = userStorage.createUser(user1);
         user2 = userStorage.createUser(user2);
         film1 = filmStorage.createFilm(film1);
@@ -252,4 +260,39 @@ class FilmoRateApplicationTests {
         List<Film> popularFilms = filmStorage.getPopular(10);
         assertThat(popularFilms).containsExactly(film2, film1);
     }
+
+    @Test
+    public void getGenreById() {
+        Optional<Genre> firstGenre = Optional.ofNullable(genresDbStorage.findById(1));
+        assertThat(firstGenre)
+                .isPresent()
+                .hasValueSatisfying(genre ->
+                        assertThat(genre).hasFieldOrPropertyWithValue("id", 1)
+                                .hasFieldOrPropertyWithValue("genreName", "Комедия")
+                );
+    }
+
+    @Test
+    public void getAllGenres() {
+        List<Genre> genres = genresDbStorage.findAll();
+        assert (genres).size() == 6;
+    }
+
+    @Test
+    public void getMpaById() {
+        Optional<Mpa> firstMpa = Optional.ofNullable(mpaDbStorage.findById(1));
+        assertThat(firstMpa)
+                .isPresent()
+                .hasValueSatisfying(genre ->
+                        assertThat(genre).hasFieldOrPropertyWithValue("id", 1)
+                                .hasFieldOrPropertyWithValue("mpaName", "G")
+                );
+    }
+
+    @Test
+    public void getAllMpa() {
+        List<Mpa> mpas = mpaDbStorage.findAll();
+        assert (mpas).size() == 5;
+    }
+
 }
