@@ -102,10 +102,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopular(int count) {
-        String sql = "SELECT * FROM FILM F LEFT " +
+
+        String sql = "SELECT F.*, M.*, COUNT(FUR.FILM_ID) FROM FILM F LEFT " +
                 "JOIN FILM_USER_RATING FUR on F.FILM_ID = FUR.FILM_ID " +
                 "JOIN MPA M on M.MPA_ID = F.MPA_ID " +
-                "GROUP BY F.FILM_ID " +
+                "group by F.FILM_ID " +
                 "ORDER BY COUNT(FUR.FILM_ID) DESC " +
                 "LIMIT ?";
         SqlRowSet srs = jdbcTemplate.queryForRowSet(sql, count);

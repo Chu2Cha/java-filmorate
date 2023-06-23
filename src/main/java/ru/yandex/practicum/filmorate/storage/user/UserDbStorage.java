@@ -66,7 +66,7 @@ public class UserDbStorage implements UserStorage {
     public void addFriend(int first, int second) {
         List<Map<String, Object>> result =
                 jdbcTemplate.queryForList("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",
-                        second, first);
+                        first, second);
         if (result.isEmpty()) {
             jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIEND_STATUS) VALUES (?, ?, ?)",
                     first, second, false);
