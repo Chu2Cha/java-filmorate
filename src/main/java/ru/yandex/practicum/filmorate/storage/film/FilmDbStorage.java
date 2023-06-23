@@ -167,6 +167,7 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
     }
-    private void doNothing(){}
 
+    private void doNothing() {
+    }
 }
