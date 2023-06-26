@@ -18,4 +18,6 @@ public interface UserStorage {
     void addFriend(int first, int second);
 
     void removeFriend(int first, int second);
+
+    List<Integer> getFriends(int userId);
 }
