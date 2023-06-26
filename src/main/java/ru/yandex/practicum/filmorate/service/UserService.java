@@ -54,11 +54,16 @@ public class UserService {
 
     public void addFriend(int userId, int friendId) {
         if (checkFriendValidation(userId, friendId)) {
-            if (userStorage.getFriends(userId).contains(friendId)) {
+            if (checkFriendStatus(userId, friendId) && checkFriendStatus(friendId, userId)) {
                 log.info("Пользователи {} и {} уже друзья!", userId, friendId);
+            } else if (checkFriendStatus(userId, friendId) && !checkFriendStatus(friendId, userId)) {
+                log.info("Пользователь {} уже направлял запрос о дружбе к {}.", userId, friendId);
+            } else if (!checkFriendStatus(userId, friendId) && !checkFriendStatus(friendId, userId)) {
+                userStorage.addFriend(userId, friendId);
+                log.info("Пользователь {} направил запрос о дружбе к {}.", userId, friendId);
             } else {
                 userStorage.addFriend(userId, friendId);
-                log.info("Пользователь {} подружился с  {}", userId, friendId);
+                log.info("Пользователь {} принял запрос и подружился с  {}", userId, friendId);
             }
         }
     }
@@ -75,9 +80,13 @@ public class UserService {
     }
 
     public List<User> getFriendList(int id) {
-        return userStorage.getFriends(id).stream()
-                .map(this::findUserById)
-                .collect(Collectors.toList());
+        User user = findUserById(id);
+        if (user != null) {
+            return userStorage.getFriends(id).stream()
+                    .map(this::findUserById)
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
     public List<User> getFriendsCommonList(int id, int otherId) {
@@ -129,5 +138,9 @@ public class UserService {
             throw new NotFoundException("Друг" + friendId + " не найден");
         }
         return true;
+    }
+
+    private boolean checkFriendStatus(int userId, int friendId) {
+        return userStorage.getFriends(userId).contains(friendId);
     }
 }

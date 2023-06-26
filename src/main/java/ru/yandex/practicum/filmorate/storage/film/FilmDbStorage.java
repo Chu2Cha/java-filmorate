@@ -91,7 +91,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(int userId, int filmId) {
-        String sql = "INSERT INTO FILM_USER_RATING VALUES (?, ?)";
+        String sql = "INSERT INTO FILM_USER_RATING (USER_ID, FILM_ID) VALUES (?, ?)";
         jdbcTemplate.update(sql, userId, filmId);
     }
 

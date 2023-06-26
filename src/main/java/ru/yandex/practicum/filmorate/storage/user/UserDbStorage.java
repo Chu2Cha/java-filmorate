@@ -64,17 +64,20 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int first, int second) {
-        List<Map<String, Object>> result =
+        List<Map<String, Object>> firstList =
                 jdbcTemplate.queryForList("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",
                         first, second);
-        if (result.isEmpty()) {
+        List<Map<String, Object>> secondList =
+                jdbcTemplate.queryForList("SELECT * FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?",
+                        second, first);
+        if (firstList.isEmpty() && secondList.isEmpty()) {
             jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIEND_STATUS) VALUES (?, ?, ?)",
                     first, second, false);
         } else {
-            jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
-                    true, first, second);
-            jdbcTemplate.update("UPDATE FRIENDS SET FRIEND_STATUS = ? WHERE USER_ID = ? AND FRIEND_ID = ?",
-                    true, second, first);
+            jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIEND_STATUS) VALUES (?, ?, ?)",
+                    first, second, true);
+            jdbcTemplate.update("INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIEND_STATUS) VALUES (?, ?, ?)",
+                    second, first, true);
         }
     }
 

@@ -77,8 +77,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(int count) {
-        List<Film> sortedFilms = new ArrayList<>(filmStorage.getPopular(count));
-        return sortedFilms;
+        return new ArrayList<>(filmStorage.getPopular(count));
     }
 
     private Film findFilmById(int id) {
